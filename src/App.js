@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 import SelectCharacter from './Components/SelectCharacter';
-
+import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
+import { ethers } from 'ethers';
+import myEpicGame from './utils/MyEpicGame.json';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
@@ -74,6 +76,39 @@ const App = () => {
     checkIfWalletIsConnected();
   }, []);
 
+  useEffect(() => {
+  /*
+   * The function we will call that interacts with out smart contract
+   */
+  const fetchNFTMetadata = async () => {
+    console.log('Checking for Character NFT on address:', currentAccount);
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const gameContract = new ethers.Contract(
+      CONTRACT_ADDRESS,
+      myEpicGame.abi,
+      signer
+    );
+
+    const txn = await gameContract.checkIfUserHasNFT();
+    if (txn.name) {
+      console.log('User has character NFT');
+      setCharacterNFT(transformCharacterData(txn));
+    } else {
+      console.log('No character NFT found');
+    }
+  };
+
+  /*
+   * We only want to run this, if we have a connected wallet
+   */
+  if (currentAccount) {
+    console.log('CurrentAccount:', currentAccount);
+    fetchNFTMetadata();
+  }
+}, [currentAccount]);
+
   const renderContent = () => {
   /*
    * Scenario #1
@@ -105,8 +140,8 @@ const App = () => {
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">⚔️ Metaverse Slayer ⚔️</p>
-          <p className="sub-text">Team up to protect the Metaverse!</p>
+          <p className="header gradient-text">⚔️ Beer Metaverse ⚔️</p>
+          <p className="sub-text">Team up the Beer Metaverse!</p>
           {/* This is where our button and image code used to be!
           *	Remember we moved it into the render method.
           */}
