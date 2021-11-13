@@ -69,7 +69,7 @@ useEffect(() => {
    */
   const onCharacterMint = async (sender, tokenId, characterIndex) => {
     console.log(
-      `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`
+      `CharacterNFTMinted - sender: ${sender} tokenId: ${tokenId.toNumber()} characterIndex: ${characterIndex.toNumber()}`      
     );
 
     /*
@@ -80,7 +80,7 @@ useEffect(() => {
       const characterNFT = await gameContract.checkIfUserHasNFT();
       console.log('CharacterNFT: ', characterNFT);
       setCharacterNFT(transformCharacterData(characterNFT));
-    }
+     }
   };
 
   if (gameContract) {
