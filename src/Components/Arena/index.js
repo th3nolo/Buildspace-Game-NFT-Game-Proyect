@@ -8,10 +8,9 @@ import './Arena.css';
 /*
  * We pass in our characterNFT metadata so we can a cool card in our UI
  */
-const Arena = ({ characterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT }) => {
   // State
   const [gameContract, setGameContract] = useState(null);
-
   const [boss, setBoss] = useState(null);
   const [attackState, setAttackState] = useState('');
 
@@ -32,8 +31,7 @@ const runAttackAction = async () => {
 };
 
 // UseEffects
-useEffect(() => {
-  /*
+useEffect(() => {/*
    * Setup async function that will get the boss from our contract and sets in state
    */
   const fetchBoss = async () => {
@@ -41,6 +39,25 @@ useEffect(() => {
     console.log('Boss:', bossTxn);
     setBoss(transformCharacterData(bossTxn));
   };
+
+  const onAttackComplete = (newBossHp, newPlayerHp) => {
+            const bossHp = newBossHp.toNumber();
+            const playerHp = newPlayerHp.toNumber();
+
+            console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`);
+
+            /*
+            * Update both player and boss Hp
+            */
+            setBoss((prevState) => {
+                return { ...prevState, hp: bossHp };
+            });
+
+            setCharacterNFT((prevState) => {
+                return { ...prevState, hp: playerHp };
+            });
+        };
+
 
   if (gameContract) {
     /*
