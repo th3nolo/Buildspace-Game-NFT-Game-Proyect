@@ -6,17 +6,20 @@ import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
 import { ethers } from 'ethers';
 import myEpicGame from './utils/MyEpicGame.json';
 import Arena from './Components/Arena';
+import LoadingIndicator from './Components/LoadingIndicator';
+
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 
+
 const App = () => {
   // State
   const [currentAccount, setCurrentAccount] = useState(null);
-
   const [characterNFT, setCharacterNFT] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Actions
   const checkIfWalletIsConnected = async () => {
@@ -25,6 +28,7 @@ const App = () => {
 
       if (!ethereum) {
         console.log('Make sure you have MetaMask!');
+        setIsLoading(false);
         return;
       } else {
         console.log('We have the ethereum object', ethereum);
@@ -42,6 +46,7 @@ const App = () => {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   };
 
   /*
@@ -74,6 +79,7 @@ const App = () => {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     checkIfWalletIsConnected();
   }, []);
 
@@ -92,13 +98,16 @@ const App = () => {
       signer
     );
 
-    const txn = await gameContract.checkIfUserHasNFT();
-    if (txn.name) {
+    const characterNFT = await gameContract.checkIfUserHasNFT();
+    if (characterNFT.name) {
       console.log('User has character NFT');
-      setCharacterNFT(transformCharacterData(txn));
-    } else {
-      console.log('No character NFT found');
+      setCharacterNFT(transformCharacterData(characterNFT));
     }
+
+    /*
+     * Once we are done with all the fetching, set loading state to false
+     */
+    setIsLoading(false);
   };
 
   /*
@@ -111,6 +120,10 @@ const App = () => {
 }, [currentAccount]);
 
   const renderContent = () => {
+
+    if (isLoading) {
+    return <LoadingIndicator />;
+  }
 
   if (!currentAccount) {
     return (
@@ -133,7 +146,7 @@ const App = () => {
 	* If there is a connected wallet and characterNFT, it's time to battle!
 	*/
   } else if (currentAccount && characterNFT) {
-    return <Arena characterNFT={characterNFT} />;
+    return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} />;
   }
 }; 
 

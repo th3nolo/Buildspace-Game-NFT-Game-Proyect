@@ -3,16 +3,17 @@ import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants';
 import myEpicGame from '../../utils/MyEpicGame.json';
 import './Arena.css';
-
+import LoadingIndicator from '../LoadingIndicator';
 
 /*
  * We pass in our characterNFT metadata so we can a cool card in our UI
  */
-const Arena = ({ characterNFT, setCharacterNFT }) => {
+const Arena = ({ characterNFT, setCharacterNFT  }) => {
   // State
   const [gameContract, setGameContract] = useState(null);
   const [boss, setBoss] = useState(null);
   const [attackState, setAttackState] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
 const runAttackAction = async () => {
   try {
@@ -23,49 +24,16 @@ const runAttackAction = async () => {
       await attackTxn.wait();
       console.log('attackTxn:', attackTxn);
       setAttackState('hit');
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
     }
   } catch (error) {
     console.error('Error attacking boss:', error);
     setAttackState('');
   }
 };
-
-// UseEffects
-useEffect(() => {/*
-   * Setup async function that will get the boss from our contract and sets in state
-   */
-  const fetchBoss = async () => {
-    const bossTxn = await gameContract.getBigBoss();
-    console.log('Boss:', bossTxn);
-    setBoss(transformCharacterData(bossTxn));
-  };
-
-  const onAttackComplete = (newBossHp, newPlayerHp) => {
-            const bossHp = newBossHp.toNumber();
-            const playerHp = newPlayerHp.toNumber();
-
-            console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`);
-
-            /*
-            * Update both player and boss Hp
-            */
-            setBoss((prevState) => {
-                return { ...prevState, hp: bossHp };
-            });
-
-            setCharacterNFT((prevState) => {
-                return { ...prevState, hp: playerHp };
-            });
-        };
-
-
-  if (gameContract) {
-    /*
-     * gameContract is ready to go! Let's fetch our boss
-     */
-    fetchBoss();
-  }
-}, [gameContract]);
 
   // UseEffects
   useEffect(() => {
@@ -86,12 +54,65 @@ useEffect(() => {/*
     }
   }, []);
 
-  return (
+
+  useEffect(() => {
+        const fetchBoss = async () => {
+            const bossTxn = await gameContract.getBigBoss();
+            console.log('Boss:', bossTxn);
+            setBoss(transformCharacterData(bossTxn));
+        };
+
+        /*
+        * Setup logic when this event is fired off
+        */
+        const onAttackComplete = (newBossHp, newPlayerHp) => {
+            const bossHp = newBossHp.toNumber();
+            const playerHp = newPlayerHp.toNumber();
+
+            console.log(`AttackComplete: Boss Hp: ${bossHp} Player Hp: ${playerHp}`);
+
+            /*
+            * Update both player and boss Hp
+            */
+            setBoss((prevState) => {
+                return { ...prevState, hp: bossHp };
+            });
+
+            setCharacterNFT((prevState) => {
+                return { ...prevState, hp: playerHp };
+            });
+        };
+
+        if (gameContract) {
+            fetchBoss();
+            gameContract.on('AttackComplete', onAttackComplete);
+        }
+
+        /*
+        * Make sure to clean up this event when this component is removed
+        */
+        return () => {
+            if (gameContract) {
+                gameContract.off('AttackComplete', onAttackComplete);
+            }
+        }
+    }, [gameContract, setCharacterNFT]);
+
+
+
+      return (
   <div className="arena-container">
+    {/* Add your toast HTML right here */}
+    {boss && characterNFT && (
+      <div id="toast" className={showToast ? 'show' : ''}>
+        <div id="desc">{`💥 ${boss.name} was hit for ${characterNFT.attackDamage}!`}</div>
+      </div>
+    )}
+
     {/* Boss */}
     {boss && (
       <div className="boss-container">
-         <div className={`boss-content ${attackState}`}>
+        <div className={`boss-content  ${attackState}`}>
           <h2>🔥 {boss.name} 🔥</h2>
           <div className="image-content">
             <img src={boss.imageURI} alt={`Boss ${boss.name}`} />
@@ -106,10 +127,16 @@ useEffect(() => {/*
             {`💥 Attack ${boss.name}`}
           </button>
         </div>
+        {attackState === 'attacking' && (
+          <div className="loading-indicator">
+            <LoadingIndicator />
+            <p>Attacking ⚔️</p>
+          </div>
+        )}
       </div>
     )}
 
-    {/* Replace your Character UI with this */}
+    {/* Character NFT */}
     {characterNFT && (
       <div className="players-container">
         <div className="player-container">
@@ -131,6 +158,10 @@ useEffect(() => {/*
             </div>
           </div>
         </div>
+        {/* <div className="active-players">
+          <h2>Active Players</h2>
+          <div className="players-list">{renderActivePlayersList()}</div>
+        </div> */}
       </div>
     )}
   </div>
