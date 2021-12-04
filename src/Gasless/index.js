@@ -35,7 +35,7 @@ const TypedData = {
   domain: {
     name: 'Defender',
     version: '1',
-    chainId: 4,
+    chainId: 80001,
     verifyingContract: ForwarderAddress,
   },
   primaryType: 'ForwardRequest',

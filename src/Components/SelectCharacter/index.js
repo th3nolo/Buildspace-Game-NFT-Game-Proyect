@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants';
 import myEpicGame from '../../utils/MyEpicGame.json';
 import LoadingIndicator from '../LoadingIndicator';
-
+import Register from '../Register'
 /*
  * Don't worry about setCharacterNFT just yet, we will talk about it soon!
  */
@@ -126,6 +126,8 @@ const mintCharacterNFTAction = (characterId) => async () => {
     return (
   <div className="select-character-container">
     <h2>Mint Your Hero. Choose wisely.</h2>
+
+    <Register/>
     {characters.length > 0 && (
       <div className="character-grid">{renderCharacters()}</div>
     )}
