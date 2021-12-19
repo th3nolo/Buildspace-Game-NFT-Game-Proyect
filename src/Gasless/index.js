@@ -2,13 +2,13 @@
 // Note that, instead of sending the tx, the end-user signs the request and sends it to a relayer server
 // This server will process the request, and if valid, send the tx via a Defender Relayer
 import ethers from 'ethers';
-import RegalisAbi from '../abis/Regalis.json';
+import RegalisAbi from '../../utils/Regalis.json';
 import ForwarderAbi from '../../utils/Forwarder.json';
 
 const ZeroAddress = '0x0000000000000000000000000000000000000000';
-const RegalisAddress = process.env['REACT_APP_REGALIS_ADDRESS'] || ZeroAddress;
-const ForwarderAddress = process.env['REACT_APP_REGALIS_ADDRESS'] || ZeroAddress;
-const RelayUrl = process.env['REACT_APP_FORWARDER_ADDRESS']
+const RegalisAddress = "0xeB65390F221F2e536dbe4869Fba69e7B48C45118";
+const ForwarderAddress= "0xf8F38887ea903eBF82bc9069dFB782cc517baDeC";
+const RelayUrl = "https://api.defender.openzeppelin.com/autotasks/def07ae6-6a83-4841-8476-2b07b0ad5cf8/runs/webhook/56656eb4-0c5f-4ccc-86ee-9e05851efc95/SgdgtrYjFBeRGSLBZasYqB"
 //const RelayUrl = process.env.REACT_APP_RELAY_URL || '/relay';
 
 //Forwarded doployed to: 0xdb324EE4ab2B5D6e546d146455C3dc63Aaa8Fc8B
@@ -47,7 +47,7 @@ const TypedData = {
 };
 
 
-export async function submit(number) {
+export async function submit() {
   
   // Initialize provider and signer from metamask
   await window.ethereum.enable();
@@ -59,6 +59,7 @@ export async function submit(number) {
 
   // Get nonce for current signer
   const forwarder = new ethers.Contract(ForwarderAddress, ForwarderAbi, provider);
+  
   const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString());
 
   // Encode meta-tx request

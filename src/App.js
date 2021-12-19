@@ -13,6 +13,8 @@ import LoadingIndicator from './Components/LoadingIndicator';
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
+//0xeB65390F221F2e536dbe4869Fba69e7B48C45118
+
 
 
 const App = () => {
